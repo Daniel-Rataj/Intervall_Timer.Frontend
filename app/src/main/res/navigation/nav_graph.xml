@@ -25,4 +25,10 @@
             android:id="@+id/action_SecondFragment_to_FirstFragment"
             app:destination="@id/FirstFragment" />
     </fragment>
+    <activity
+        android:id="@+id/ExerciseDetailsActivity"
+        android:name="intervall_timer.frontend.ExerciseDetailsActivity"
+        android:label="@string/exercise_detail_label"
+        tools:layout="@layout/activity_exercise_detail">
+    </activity>
 </navigation>

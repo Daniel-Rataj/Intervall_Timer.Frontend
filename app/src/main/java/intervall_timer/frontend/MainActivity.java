@@ -1,8 +1,7 @@
 package intervall_timer.frontend;
 
+import android.content.Intent;
 import android.os.Bundle;
-
-import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -13,26 +12,28 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import intervall_timer.frontend.Model.Exercise;
 import intervall_timer.frontend.Service.ApiClient;
-import intervall_timer.frontend.Service.ExerciseAdapter;
 import intervall_timer.frontend.Service.Response.ServiceResponse;
 import intervall_timer.frontend.databinding.ActivityMainBinding;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.http.Body;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements  ExerciseAdapter.ClickedItem, CreateExerciseDialog.CreateExerciseDialogListener {
+
+    private final String EXERCISEDETAILKEY = "DATA";
 
     private AppBarConfiguration appBarConfiguration;
     private ActivityMainBinding binding;
@@ -41,7 +42,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // app:layout_constraintTop_toBottomOf="@id/textview_first"
         super.onCreate(savedInstanceState);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
@@ -50,9 +50,8 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerview);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
-        exerciseAdapter = new ExerciseAdapter();
+        exerciseAdapter = new ExerciseAdapter(this::ClickedExercise);
         getAllExercises();
 
 
@@ -62,13 +61,17 @@ public class MainActivity extends AppCompatActivity {
         appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
-        binding.fab.setOnClickListener(new View.OnClickListener() {
+        binding.createExercise.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                openDialog();
             }
         });
+    }
+
+    private void openDialog() {
+        CreateExerciseDialog exerciseDialog = new CreateExerciseDialog();
+        exerciseDialog.show(getSupportFragmentManager(), "Create new Exercise");
     }
 
     public void getAllExercises() {
@@ -122,5 +125,33 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         return NavigationUI.navigateUp(navController, appBarConfiguration)
                 || super.onSupportNavigateUp();
+    }
+
+    @Override
+    public void ClickedExercise(Exercise exercise) {
+        String toastMsg = "Übung " + exercise.getName() + " wird geöffnet";
+        Toast.makeText(this, toastMsg, Toast.LENGTH_LONG).show();
+        Intent exerciseDetailsIntent = new Intent(this, ExerciseDetailsActivity.class)
+                .putExtra(EXERCISEDETAILKEY, exercise);
+        startActivity(exerciseDetailsIntent);
+    }
+
+    @Override
+    public void saveExercise(String name, int repCount, int lapTime, int lapBreaktime, int startCountdown) {
+        Exercise createdExercise = new Exercise(name, repCount, lapTime, lapBreaktime, startCountdown);
+        Call<ServiceResponse<Exercise>> save = ApiClient.getExerciseService().save(createdExercise);
+        save.enqueue(new Callback<ServiceResponse<Exercise>>() {
+            @Override
+            public void onResponse(Call<ServiceResponse<Exercise>> call, Response<ServiceResponse<Exercise>> response) {
+                if(response.isSuccessful()) {
+                    getAllExercises();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ServiceResponse<Exercise>> call, Throwable t) {
+                Log.e("failure", t.getLocalizedMessage());
+            }
+        });
     }
 }

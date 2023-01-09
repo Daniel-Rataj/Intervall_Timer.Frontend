@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/newExerciseName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Name der Übung"></EditText>
+
+    <EditText
+        android:id="@+id/newExerciseRepCount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Wiederholungen/Runden"
+        android:inputType="number"
+        android:layout_below="@id/newExerciseName"></EditText>
+
+    <EditText
+        android:id="@+id/newExerciseLapTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Ausführungszeit der Übung"
+        android:inputType="number"
+        android:layout_below="@id/newExerciseRepCount"></EditText>
+
+    <EditText
+        android:id="@+id/newExerciseLapBreakTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Pausenzeit nach Ausführung der Übung"
+        android:inputType="number"
+        android:layout_below="@id/newExerciseLapTime"></EditText>
+
+    <EditText
+        android:id="@+id/newExerciseStartCountdown"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Start Countdown"
+        android:inputType="number"
+        android:layout_below="@id/newExerciseLapBreakTime"></EditText>
+
+</RelativeLayout>
