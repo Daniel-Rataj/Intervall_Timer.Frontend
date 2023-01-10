@@ -31,7 +31,7 @@ public class CreateExerciseDialog extends AppCompatDialogFragment {
                 .setNegativeButton("abbrechen", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
+                        dialog.cancel();
                     }
                 })
                 .setPositiveButton("speichern", new DialogInterface.OnClickListener() {
