@@ -1,4 +1,4 @@
-package intervall_timer.frontend;
+package intervall_timer.frontend.Adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -12,7 +12,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
+import intervall_timer.frontend.MainActivity;
 import intervall_timer.frontend.Model.Exercise;
+import intervall_timer.frontend.R;
 
 public class ExerciseAdapter extends RecyclerView.Adapter<ExerciseAdapter.ExerciseAdapterVH>
 {
@@ -51,7 +53,7 @@ public class ExerciseAdapter extends RecyclerView.Adapter<ExerciseAdapter.Exerci
     }
 
     public interface ClickedItem {
-        public void ClickedExercise(Exercise exercise);
+        void ClickedExercise(Exercise exercise);
     }
 
 
@@ -72,10 +74,16 @@ public class ExerciseAdapter extends RecyclerView.Adapter<ExerciseAdapter.Exerci
             exerciseName = itemView.findViewById(R.id.exerciseName);
             deleteExercise = itemView.findViewById(R.id.deleteExercise);
             deleteExercise.setOnClickListener(view -> {
-                exerciseAdapter.exerciseList.remove(getBindingAdapterPosition());
-                exerciseAdapter.notifyItemRemoved(getBindingAdapterPosition());
+                Exercise exerciseToBeDeleted = exerciseList.get(getBindingAdapterPosition());
+                ((MainActivity)context).deleteExercise(exerciseToBeDeleted);
             });
+
+
             editExercise = itemView.findViewById(R.id.editExercise);
+            editExercise.setOnClickListener(view -> {
+                Exercise exerciseToBeEdited = exerciseList.get(getBindingAdapterPosition());
+                ((MainActivity)context).openEditDialog(exerciseToBeEdited);
+            });
 
         }
 

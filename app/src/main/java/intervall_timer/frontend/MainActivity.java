@@ -15,6 +15,8 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import intervall_timer.frontend.Adapter.ExerciseAdapter;
+import intervall_timer.frontend.Dialog.CreateExerciseDialog;
 import intervall_timer.frontend.Model.Exercise;
 import intervall_timer.frontend.Service.ApiClient;
 import intervall_timer.frontend.Service.Response.ServiceResponse;
@@ -22,7 +24,6 @@ import intervall_timer.frontend.databinding.ActivityMainBinding;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.http.Body;
 
 import android.view.Menu;
 import android.view.MenuItem;
@@ -64,14 +65,19 @@ public class MainActivity extends AppCompatActivity implements  ExerciseAdapter.
         binding.createExercise.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                openDialog();
+                openCreationDialog();
             }
         });
     }
 
-    private void openDialog() {
+    private void openCreationDialog() {
         CreateExerciseDialog exerciseDialog = new CreateExerciseDialog();
         exerciseDialog.show(getSupportFragmentManager(), "Create new Exercise");
+    }
+
+    public void openEditDialog(Exercise exercise) {
+        CreateExerciseDialog exerciseDialog = new CreateExerciseDialog(exercise);
+        exerciseDialog.show(getSupportFragmentManager(), "Edit Exercise");
     }
 
     public void getAllExercises() {
@@ -136,7 +142,6 @@ public class MainActivity extends AppCompatActivity implements  ExerciseAdapter.
         startActivity(exerciseDetailsIntent);
     }
 
-    @Override
     public void saveExercise(String name, int repCount, int lapTime, int lapBreaktime, int startCountdown) {
         Exercise createdExercise = new Exercise(name, repCount, lapTime, lapBreaktime, startCountdown);
         Call<ServiceResponse<Exercise>> save = ApiClient.getExerciseService().save(createdExercise);
@@ -150,7 +155,44 @@ public class MainActivity extends AppCompatActivity implements  ExerciseAdapter.
 
             @Override
             public void onFailure(Call<ServiceResponse<Exercise>> call, Throwable t) {
-                Log.e("failure", t.getLocalizedMessage());
+                Log.e("At exercise save: ", t.getLocalizedMessage());
+            }
+        });
+    }
+
+    public void deleteExercise(Exercise exercise) {
+        long id = exercise.getId();
+        Call<ServiceResponse<Exercise>> deleteCall = ApiClient.getExerciseService().delete(id);
+        deleteCall.enqueue(new Callback<ServiceResponse<Exercise>>() {
+            @Override
+            public void onResponse(Call<ServiceResponse<Exercise>> call, Response<ServiceResponse<Exercise>> response) {
+                if(response.isSuccessful()) {
+                    getAllExercises();
+                    String toastMsg = "Übung " + exercise.getName() + " wurde erfolgreich gelöscht";
+                    Toast.makeText(getBaseContext(), toastMsg, Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ServiceResponse<Exercise>> call, Throwable t) {
+                Log.e("At exercise delete: ", t.getLocalizedMessage());
+            }
+        });
+    }
+
+    public void editExercise(Exercise editedExercise) {
+        Call<ServiceResponse<Exercise>> save = ApiClient.getExerciseService().save(editedExercise);
+        save.enqueue(new Callback<ServiceResponse<Exercise>>() {
+            @Override
+            public void onResponse(Call<ServiceResponse<Exercise>> call, Response<ServiceResponse<Exercise>> response) {
+                if(response.isSuccessful()) {
+                    getAllExercises();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ServiceResponse<Exercise>> call, Throwable t) {
+                Log.e("At exercise edit: ", t.getLocalizedMessage());
             }
         });
     }

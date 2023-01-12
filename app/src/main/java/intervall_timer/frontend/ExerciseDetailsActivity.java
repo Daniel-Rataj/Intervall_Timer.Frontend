@@ -132,8 +132,8 @@ public class ExerciseDetailsActivity extends AppCompatActivity {
         countDownTimer = new CountDownTimer(lapTimeLeftInMillis, COUNTDOWNINTERVAL) {
             @Override
             public void onTick(long millisUntilFinished) {
-                lapTimeLeftInMillis = millisUntilFinished;
                 updateCountDownText();
+                lapTimeLeftInMillis = millisUntilFinished;
             }
             @Override
             public void onFinish() {
@@ -155,6 +155,7 @@ public class ExerciseDetailsActivity extends AppCompatActivity {
                     buttonReset.setVisibility(View.VISIBLE);
                     getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 }
+                updateCountDownText();
             }
         }.start();
         timerRunning = true;
