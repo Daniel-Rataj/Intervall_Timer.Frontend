@@ -134,6 +134,9 @@ public class ExerciseDialog extends AppCompatDialogFragment {
         if(name.isEmpty()) {
             textInputNewExerciseName.setError("Feld darf nicht leer sein");
             return false;
+        } else if(name.isEmpty() || name.length() > 50) {
+            textInputNewExerciseName.setError("Name ist zu lang");
+            return false;
         } else {
             textInputNewExerciseName.setError(null);
             return true;
