@@ -31,7 +31,7 @@ public class ExerciseDetailsActivity extends AppCompatActivity {
     private final String START = "Start";
 
     // UI
-    private TextView textViewName, textViewRepCount, textViewCountDown;
+    private TextView textViewName, textViewRepCount, textViewCountDown, textViewUserNotification;
     private Exercise currentExercise;
     private Button buttonStartPause;
     private Button buttonReset;
@@ -42,6 +42,7 @@ public class ExerciseDetailsActivity extends AppCompatActivity {
     private int currentRepetition = 1;
     private boolean isBreakMode = false;
     private boolean isPauseMode = false;
+    private boolean isStartCountdownFinished = false;
 
     private CountDownTimer countDownTimer;
     private boolean timerRunning;
@@ -59,6 +60,8 @@ public class ExerciseDetailsActivity extends AppCompatActivity {
         textViewName = findViewById(R.id.textViewName);
         textViewRepCount = findViewById(R.id.textViewRepCount);
         textViewCountDown = findViewById(R.id.textViewCountDown);
+        textViewUserNotification = findViewById(R.id.userNotification);
+
 
         // Layout
         layout = findViewById(R.id.timer_layout);
@@ -72,8 +75,8 @@ public class ExerciseDetailsActivity extends AppCompatActivity {
             String exerciseName = currentExercise.getName();
             textViewName.setText(exerciseName);
 
-            // Lap Time / Timer Display
-            lapTimeLeftInMillis = convertSecToMillis(currentExercise.getLapTime());
+            // Start Countdown / Timer Display
+            lapTimeLeftInMillis = convertSecToMillis(currentExercise.getStartCountdown());
 
             // Initial Value for Repetition Count
             textViewRepCount.setText(REPCOUNT + "1");
@@ -89,7 +92,6 @@ public class ExerciseDetailsActivity extends AppCompatActivity {
                 if(timerRunning) {
                     pauseTimer();
                 } else {
-                    // Lap Settings
                     startTimer();
                 }
             }
@@ -108,25 +110,30 @@ public class ExerciseDetailsActivity extends AppCompatActivity {
         return (lapTime * 1000);
     }
 
+    /**
+     * Recursive-Method to control the configurations of the timer
+     * Consists 3 timer conditions
+     * 1. Start-Countdown
+     * 2. Exercise-Timer
+     * 3. Break-Timer
+     * Finishes after all repetitions are done
+     * */
     private void startTimer() {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        int timeToRun = 0;
 
-        //Breakmode Handling
-        if(isBreakMode) {
-            layout.setBackgroundResource(R.drawable.gradient_background_red);
-            timeToRun = currentExercise.getLapBreakTime();
+        // isStartCountdownFinished is by default false
+        if(isStartCountdownFinished) {
+            //Break Mode Handling
+            lapTimeLeftInMillis = handleBreakMode();
         } else {
-            layout.setBackgroundResource(R.drawable.gradient_background_green);
-            timeToRun = currentExercise.getLapTime();
+            // startCountdown was assigned to lapTimeLeftInMillis at the onCreate() Method
+            // UI
+            layout.setBackgroundResource(R.drawable.gradient_background_blue);
         }
 
-        //Pausemode Handling
+        // Pause-Mode is only being toggled if currently in Pause-Mode
         if(isPauseMode) {
-            // LapTimeLefInMillis needs no adjustment
-            isPauseMode = false;
-        } else {
-            lapTimeLeftInMillis = convertSecToMillis(timeToRun);
+            togglePauseMode();
         }
 
         countDownTimer = new CountDownTimer(lapTimeLeftInMillis, COUNTDOWNINTERVAL) {
@@ -137,23 +144,29 @@ public class ExerciseDetailsActivity extends AppCompatActivity {
             }
             @Override
             public void onFinish() {
-                // Repetition is only counting up after breaks
-                currentRepetition = isBreakMode ? currentRepetition+1 : currentRepetition;
+                if(isStartCountdownFinished) {
+                    // Repetition is only counting up after breaks
+                    currentRepetition = isBreakMode ? currentRepetition+1 : currentRepetition;
 
-                // Adjusting the isBreakMode Flag
-                isBreakMode = !isBreakMode;
+                    // Adjusting the isBreakMode Flag
+                    isBreakMode = !isBreakMode;
 
-                if(currentRepetition <= currentExercise.getRepCount()) {
-                    // Adjusting the RepetitionCount Text
-                    String repCount = REPCOUNT + Integer.toString(currentRepetition);
-                    textViewRepCount.setText(repCount);
-                    timerRunning = false;
-                    startTimer();
+                    if(currentRepetition <= currentExercise.getRepCount()) {
+                        // Adjusting the RepetitionCount Text
+                        String repCount = REPCOUNT + Integer.toString(currentRepetition);
+                        textViewRepCount.setText(repCount);
+                        timerRunning = false;
+                        startTimer();
+                    } else {
+                        buttonStartPause.setText(START);
+                        buttonStartPause.setVisibility(View.INVISIBLE);
+                        buttonReset.setVisibility(View.VISIBLE);
+                        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    }
                 } else {
-                    buttonStartPause.setText(START);
-                    buttonStartPause.setVisibility(View.INVISIBLE);
-                    buttonReset.setVisibility(View.VISIBLE);
-                    getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    textViewUserNotification.setVisibility(View.INVISIBLE);
+                    isStartCountdownFinished = true;
+                    startTimer();
                 }
                 updateCountDownText();
             }
@@ -163,6 +176,36 @@ public class ExerciseDetailsActivity extends AppCompatActivity {
         buttonReset.setVisibility(View.INVISIBLE);
     }
 
+    /**
+     * Sets the configurations for the Break-mode*/
+    private long handleBreakMode() {
+        long timeInMillis;
+        if(isBreakMode) {
+            layout.setBackgroundResource(R.drawable.gradient_background_red);
+            timeInMillis = isPauseMode ? lapTimeLeftInMillis : convertSecToMillis(currentExercise.getLapBreakTime());
+            textViewUserNotification.setText("PAUSE!");
+            textViewUserNotification.setVisibility(View.VISIBLE);
+
+        } else {
+            layout.setBackgroundResource(R.drawable.gradient_background_green);
+            textViewUserNotification.setVisibility(View.INVISIBLE);
+            timeInMillis = isPauseMode ? lapTimeLeftInMillis : convertSecToMillis(currentExercise.getLapTime());
+
+        }
+        return timeInMillis;
+    }
+
+    /**
+     * Toggles the Pause-Mode if Pause-Mode is active
+     *
+     * */
+    private void togglePauseMode() {
+        isPauseMode = (!isPauseMode);
+    }
+
+    /**
+     * Sets the configuration for the Pause-mode
+     * */
     private void pauseTimer() {
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         isPauseMode = true;
@@ -173,20 +216,29 @@ public class ExerciseDetailsActivity extends AppCompatActivity {
         buttonReset.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Resets the timer configurations
+     * */
     private void resetTimer() {
         // Resetting Logic
-        lapTimeLeftInMillis = convertSecToMillis(currentExercise.getLapTime());
+        lapTimeLeftInMillis = convertSecToMillis(currentExercise.getStartCountdown());
         isBreakMode = false;
         isPauseMode = false;
+        isStartCountdownFinished = false;
         currentRepetition = 1;
         // Resetting UI
         updateCountDownText();
         buttonReset.setVisibility(View.INVISIBLE);
         buttonStartPause.setVisibility(View.VISIBLE);
-        layout.setBackgroundResource(R.drawable.gradient_background_green);
+        layout.setBackgroundResource(R.drawable.gradient_background_blue);
+        textViewUserNotification.setText("Machen Sie sich bereit!");
+        textViewUserNotification.setVisibility(View.VISIBLE);
         textViewRepCount.setText(REPCOUNT + Integer.toString(currentRepetition));
     }
 
+    /**
+     * Sets the textview text for the timer
+     * */
     private void updateCountDownText() {
         int minutes = (int) (lapTimeLeftInMillis / 1000) / 60;
         int seconds = (int) (lapTimeLeftInMillis / 1000) % 60;

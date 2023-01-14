@@ -9,4 +9,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="recyclerview_background">#AFAFAF</color>
     <color name="mainColor">#4CAF50</color>
+    <color name="red_cancelColor">#F44336</color>
 </resources>

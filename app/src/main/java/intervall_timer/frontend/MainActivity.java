@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import intervall_timer.frontend.Adapter.ExerciseAdapter;
-import intervall_timer.frontend.Dialog.CreateExerciseDialog;
+import intervall_timer.frontend.Dialog.ExerciseDialog;
 import intervall_timer.frontend.Model.Exercise;
 import intervall_timer.frontend.Service.ApiClient;
 import intervall_timer.frontend.Service.Response.ServiceResponse;
@@ -32,7 +32,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements  ExerciseAdapter.ClickedItem, CreateExerciseDialog.CreateExerciseDialogListener {
+public class MainActivity extends AppCompatActivity implements  ExerciseAdapter.ClickedItem, ExerciseDialog.CreateExerciseDialogListener {
 
     private final String EXERCISEDETAILKEY = "DATA";
 
@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements  ExerciseAdapter.
     private ActivityMainBinding binding;
     private RecyclerView recyclerView;
     private ExerciseAdapter exerciseAdapter;
+    private ExerciseDialog exerciseDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,13 +72,21 @@ public class MainActivity extends AppCompatActivity implements  ExerciseAdapter.
     }
 
     private void openCreationDialog() {
-        CreateExerciseDialog exerciseDialog = new CreateExerciseDialog();
+        exerciseDialog = new ExerciseDialog();
         exerciseDialog.show(getSupportFragmentManager(), "Create new Exercise");
     }
 
     public void openEditDialog(Exercise exercise) {
-        CreateExerciseDialog exerciseDialog = new CreateExerciseDialog(exercise);
+        exerciseDialog = new ExerciseDialog(exercise);
         exerciseDialog.show(getSupportFragmentManager(), "Edit Exercise");
+    }
+
+    public void onSave(View v) {
+        exerciseDialog.save();
+    }
+
+    public void onCancel(View v) {
+        exerciseDialog.cancel();
     }
 
     public void getAllExercises() {

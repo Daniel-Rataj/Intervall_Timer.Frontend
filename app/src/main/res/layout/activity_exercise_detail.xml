@@ -7,18 +7,9 @@
     android:layout_height="match_parent"
     tools:context=".ExerciseDetailsActivity"
     android:orientation="vertical"
-    android:background="@drawable/gradient_background_green">
+    android:background="@drawable/gradient_background_blue">
 
-    <TextView
-        android:id="@+id/textViewName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Name der Übung"
-        android:textSize="30sp"
-        android:textColor="@color/black"
-        android:layout_centerHorizontal="true"
-        android:layout_above="@+id/textViewRepCount">
-    </TextView>
+
 
     <TextView
         android:id="@+id/textViewRepCount"
@@ -27,8 +18,18 @@
         android:text="Aktuelle Runde: "
         android:textSize="30sp"
         android:layout_centerHorizontal="true"
-        android:layout_above="@+id/textViewCountDown"
+        android:layout_marginTop="50dp"
         ></TextView>
+
+    <TextView
+        android:id="@+id/userNotification"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/textViewCountDown"
+        android:textSize="30sp"
+        android:textColor="@color/white"
+        android:text="Machen Sie sich bereit!"></TextView>
 
     <TextView
         android:id="@+id/textViewCountDown"
@@ -41,10 +42,22 @@
         android:layout_centerVertical="true">
     </TextView>
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/textViewName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/textViewCountDown"
+        android:text="Name der Übung"
+        android:textSize="30sp"
+        android:textColor="@color/black"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/textViewCountDown">
+    </TextView>
+
+    <LinearLayout
+        android:id="@+id/buttonContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textViewName"
         android:layout_centerHorizontal="true">
     <Button
         android:id="@+id/button_start_pause"
@@ -66,5 +79,6 @@
         tools:visibility="visible"
         />
     </LinearLayout>
+
 
 </RelativeLayout>
